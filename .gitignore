@@ -1,0 +1,5 @@
+.idea
+.venv
+.zen
+.dockerignore
+/app/weights

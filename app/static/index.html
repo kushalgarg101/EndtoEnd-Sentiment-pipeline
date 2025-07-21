@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Frontend</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        textarea { width: 80%; height: 100px; margin-bottom: 10px; }
+        button { padding: 10px 20px; cursor: pointer; }
+        #results { margin-top: 20px; padding: 15px; border: 1px solid #ccc; background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>Get Predictions</h1>
+
+    <p>Enter your input strings (one per line):</p>
+    <textarea id="inputText" placeholder="Enter text here..."></textarea><br>
+    <button onclick="getPredictions()">Get Predictions</button>
+
+    <h2>Results:</h2>
+    <pre id="results"></pre>
+
+    <script>
+        async function getPredictions() {
+            const inputText = document.getElementById('inputText').value;
+            const inputData = inputText.split('\n').filter(line => line.trim() !== ''); // Split by new line and filter empty
+
+            if (inputData.length === 0) {
+                alert('Please enter some text to get predictions.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/predictions', { // Adjust if your FastAPI is on a different port/host
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(inputData),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorText}`);
+                }
+
+                const data = await response.json();
+                document.getElementById('results').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('results').textContent = `Error: ${error.message}`;
+                console.error('Error fetching predictions:', error);
+            }
+        }
+    </script>
+</body>
+</html>
